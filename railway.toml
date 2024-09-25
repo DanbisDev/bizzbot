@@ -1,9 +1,16 @@
 [build]
 builder = "NIXPACKS"
 
-# Use Nix to install Google Chrome and ChromeDriver
+# Include Python, Google Chrome, and ChromeDriver in the Nix environment
 [build.nixpacksPlan.phases.setup]
-nixPkgs = ["google-chrome", "chromedriver"]
+nixPkgs = ["python311", "google-chrome", "chromedriver"]
+
+[build.nixpacksPlan.phases.install]
+cmds = [
+  "python -m venv --copies /opt/venv",
+  ". /opt/venv/bin/activate",
+  "pip install -r requirements.txt"
+]
 
 [deploy]
 startCommand = "python app.py"
