@@ -60,6 +60,8 @@ def get_listings_from_url(url):
             title = element.find_element(By.CLASS_NAME, 'title').text
             description = element.find_element(By.CLASS_NAME, 'description').text
             price = element.find_element(By.CLASS_NAME, 'asking-price').text
+            if price == "":
+                price = element.find_element(By.CLASS_NAME, 'asking-price-mobile').text
 
             try:
                 url = element.find_element(By.CLASS_NAME, 'showcase').get_attribute('href')
