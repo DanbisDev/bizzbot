@@ -1,16 +1,12 @@
 [build]
-# Define Nix packages to install (for Chrome and ChromeDriver)
-packages = [
-  "google-chrome",   # Google Chrome
-  "chromedriver"     # ChromeDriver
-]
+# Use a custom build command to install Chrome and ChromeDriver using Nix
+buildCommand = '''
+nix-shell -p google-chrome chromedriver --run "pip install -r requirements.txt"
+'''
 
-# You can also use a custom build command if needed (but default Nixpacks should suffice)
-# buildCommand = "pip install -r requirements.txt"
-
-# Start command for your Python application
 [deploy]
+# Start your Flask app
 startCommand = "python app.py"
 
-# Healthcheck path (you can adjust this based on your app’s endpoints)
+# Healthcheck endpoint
 healthcheckPath = "/"
