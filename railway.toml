@@ -1,12 +1,26 @@
 [build]
-# Use a custom build command to install Chrome and ChromeDriver
-buildCommand = '''
-nix-shell -I nixpkgs=https://nixos.org/channels/nixpkgs-unstable -p google-chrome chromedriver --run "pip install -r requirements.txt"
-'''
+builder = "NIXPACKS"
+
+# Add Nix packages to install Google Chrome and ChromeDriver during the build process
+[build.nixpacks]
+phases.install.cmds = [
+  "apt-get update",
+  "apt-get install -y wget gnupg unzip curl",
+  "curl -sSL https://dl.google.com/linux/linux_signing_key.pub | apt-key add -",
+  "echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' > /etc/apt/sources.list.d/google-chrome.list",
+  "apt-get update && apt-get install -y google-chrome-stable",
+  "CHROME_VERSION=$(google-chrome --version | grep -oP '\\d+\\.\\d+\\.\\d+')",
+  "CHROMEDRIVER_VERSION=$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION)",
+  "wget -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip",
+  "unzip /tmp/chromedriver.zip -d /usr/local/bin/",
+  "chmod +x /usr/local/bin/chromedriver"
+]
 
 [deploy]
-# Start your Flask app
+runtime = "V2"
+numReplicas = 1
 startCommand = "python app.py"
-
-# Healthcheck endpoint
 healthcheckPath = "/"
+sleepApplication = false
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
