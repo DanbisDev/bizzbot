@@ -59,9 +59,9 @@ def get_listings_from_url(url):
             price = element.find_element(By.CLASS_NAME, 'asking-price').text
             url = element.find_element(By.CLASS_NAME, 'showcase').get_attribute('href')
             try:
-                cash_flow = element.find_element(By.CLASS_NAME, 'cash-flow').text
+                cash_flow = element.find_element(By.CLASS_NAME, 'cash-flow').text.replace('Cash Flow: ', '')
             except:
-                cash_flow = "Not found"
+                cash_flow = ""
             listings.append(Listing(title, description, cash_flow, price, url))
 
     finally:
