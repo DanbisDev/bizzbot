@@ -3,7 +3,7 @@ builder = "NIXPACKS"
 
 # Include Python, Google Chrome, and ChromeDriver in the Nix environment
 [build.nixpacksPlan.phases.setup]
-nixPkgs = ["python311", "chromium", "chromedriver"]
+nixPkgs = ["python311", "chromium-chromedriver"]
 
 [build.nixpacksPlan.phases.install]
 cmds = [
