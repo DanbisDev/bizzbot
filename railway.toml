@@ -1,9 +1,15 @@
 [build]
-# Define Nix packages to install
+builder = "nixpacks"
+buildCommand = "echo building!"
+
+# Specify Nix packages to ensure Chrome and ChromeDriver are installed
 packages = [
-  "google-chrome",   # Install Google Chrome
-  "chromedriver"     # Install ChromeDriver
+  "google-chrome",    # Google Chrome
+  "chromedriver"      # ChromeDriver
 ]
 
-# Define a custom start command (if necessary)
-start_command = "python app.py"
+[deploy]
+startCommand = "python app.py"  # Ensure the correct start command for your app
+healthcheckPath = "/"
+healthcheckTimeout = 100
+restartPolicyType = "never"
