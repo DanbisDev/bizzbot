@@ -31,11 +31,6 @@ def get_listings_from_url(url):
     }
 
     chrome_options = Options()
-    chrome_options.add_argument("--headless")  # Run Chrome in headless mode
-    chrome_options.add_argument("--no-sandbox")  # Required for running in containers
-    chrome_options.add_argument("--disable-dev-shm-usage")  # Prevent shared memory issues
-    chrome_options.add_argument("--disable-gpu")  # Disable GPU rendering
-    chrome_options.add_argument("--window-size=1920x1080")  # Set window size for headless mode
 
     # Initialize ChromeDriver (should be in the PATH if installed with Nixpacks)
     driver = webdriver.Chrome(options=chrome_options)
