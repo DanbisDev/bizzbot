@@ -1,33 +1,27 @@
-# Configure the builder to use Nixpacks
 [build]
 builder = "NIXPACKS"
-# Define the Nix packages for Google Chrome and ChromeDriver
-nixpacksPlan = '''
-  {
-    "phases": {
-      "install": {
-        "nixPkgs": ["google-chrome", "chromedriver"],
-        "cmds": [
-          "apt-get update",
-          "apt-get install -y wget gnupg unzip curl",
-          "curl -sSL https://dl.google.com/linux/linux_signing_key.pub | apt-key add -",
-          "echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' > /etc/apt/sources.list.d/google-chrome.list",
-          "apt-get update && apt-get install -y google-chrome-stable",
-          "CHROME_VERSION=$(google-chrome --version | grep -oP '\\d+\\.\\d+\\.\\d+')",
-          "CHROMEDRIVER_VERSION=$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION)",
-          "wget -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip",
-          "unzip /tmp/chromedriver.zip -d /usr/local/bin/",
-          "chmod +x /usr/local/bin/chromedriver"
-        ]
-      }
-    }
-  }
-'''
+
+# Define the Nixpacks phases to install Chrome and ChromeDriver
+[build.nixpacksPlan.phases.setup]
+nixPkgs = ["google-chrome", "chromedriver"]
+
+[build.nixpacksPlan.phases.install]
+cmds = [
+  "apt-get update",
+  "apt-get install -y wget gnupg unzip curl",
+  "curl -sSL https://dl.google.com/linux/linux_signing_key.pub | apt-key add -",
+  "echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' > /etc/apt/sources.list.d/google-chrome.list",
+  "apt-get update && apt-get install -y google-chrome-stable",
+  "CHROME_VERSION=$(google-chrome --version | grep -oP '\\d+\\.\\d+\\.\\d+')",
+  "CHROMEDRIVER_VERSION=$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION)",
+  "wget -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip",
+  "unzip /tmp/chromedriver.zip -d /usr/local/bin/",
+  "chmod +x /usr/local/bin/chromedriver"
+]
 
 # Use the default build command unless you have a specific one
 buildCommand = "pip install -r requirements.txt"
 
-# Deployment settings
 [deploy]
 # Command to start your application
 startCommand = "python app.py"
