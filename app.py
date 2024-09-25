@@ -1,3 +1,4 @@
+import requests
 from flask import Flask, render_template, request, send_from_directory, jsonify
 from bizzbot_scraper import get_csv_and_save
 import os
@@ -10,11 +11,13 @@ def index():
 
 @app.route('/502', methods=['GET'])
 def error_page():
+    requests.get('intuitive-kindness.railway.internal:4444')
     return render_template('502.html')
 
 # Handle 502 error
 @app.errorhandler(502)
 def bad_gateway_error(e):
+    requests.get('intuitive-kindness.railway.internal:4444')
     return render_template('502.html'), 502
 
 # Route to serve the file for download
