@@ -1,7 +1,7 @@
 [build]
 builder = "NIXPACKS"
 
-# Setup phase: install Python, Google Chrome, ChromeDriver, and additional dependencies using Nix
+# Setup phase: install Python, Google Chrome, ChromeDriver, and additional dependencies
 [build.nixpacksPlan.phases.setup]
 nixPkgs = [
   "python311",
@@ -12,21 +12,16 @@ nixPkgs = [
   "libxi",
   "gconf",
   "jdk",
-  "gcc"  # Include gcc for compiling if needed
+  "gcc"
 ]
 
-# Install phase: create a virtual environment, activate it, and install Python dependencies
 [build.nixpacksPlan.phases.install]
+# Installing virtual environment and dependencies, followed by ChromeDriver setup
 cmds = [
   "python -m venv --copies /opt/venv",
   ". /opt/venv/bin/activate",
-  "pip install -r requirements.txt"
-]
-
-# Additional commands to be run after dependencies are installed
-[build.nixpacksPlan.phases.install.after]
-cmds = [
-  # Download and set up the ChromeDriver
+  "pip install -r requirements.txt",
+  # Set up ChromeDriver
   "wget https://chromedriver.storage.googleapis.com/2.41/chromedriver_linux64.zip",
   "unzip chromedriver_linux64.zip",
   "sudo mv chromedriver /usr/bin/chromedriver",
