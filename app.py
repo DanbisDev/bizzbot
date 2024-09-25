@@ -39,4 +39,7 @@ def generate_link():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    from waitress import serve
+
+    port = 80
+    serve(app, host="0.0.0.0", port=port)
