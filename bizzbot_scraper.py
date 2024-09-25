@@ -1,6 +1,7 @@
 import csv
 import os
 from selenium import webdriver
+from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -30,18 +31,8 @@ def get_listings_from_url(url):
         "profile.managed_default_content_settings.javascript": 2  # 2 means disable JavaScript
     }
 
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")  # Run Chrome in headless mode
-    chrome_options.add_argument("--no-sandbox")  # Bypass OS security model, necessary in containers
-    chrome_options.add_argument("--disable-dev-shm-usage")  # Overcome limited resource problems
-    chrome_options.add_argument("--disable-gpu")  # Disable GPU for headless mode
-    chrome_options.add_argument("--window-size=1920x1080")  # Set window size for headless mode
-    user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36'
-    chrome_options.add_argument(f'user-agent={user_agent}')
-    chrome_options.add_argument('--lang=en_US')
-
-    # Initialize ChromeDriver (should be in the PATH if installed with Nixpacks)
-    driver = webdriver.Chrome(options=chrome_options)
+    options = webdriver.ChromeOptions()
+    driver = webdriver.Remote("http://127.0.0.1:4444/wd/hub", options=options)
 
     try:
         # Open the target URL
