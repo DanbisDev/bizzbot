@@ -1,6 +1,10 @@
 from flask import Flask, render_template, request, send_from_directory, jsonify
-import os
 from bizzbot_scraper import get_csv_and_save
+import os
+
+# Check Chrome and ChromeDriver versions
+os.system("google-chrome --version")
+os.system("chromedriver --version")
 
 app = Flask(__name__)
 
