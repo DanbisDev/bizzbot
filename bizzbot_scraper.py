@@ -32,7 +32,9 @@ def get_listings_from_url(url):
     }
 
     options = webdriver.ChromeOptions()
+
     driver = webdriver.Remote("intuitive-kindness.railway.internal:4444/wd/hub", options=options)
+    driver.set_window_size(1920, 1080)
 
     print("Got driver...")
 
@@ -60,8 +62,6 @@ def get_listings_from_url(url):
             title = element.find_element(By.CLASS_NAME, 'title').text
             description = element.find_element(By.CLASS_NAME, 'description').text
             price = element.find_element(By.CLASS_NAME, 'asking-price').text
-            if price == "":
-                price = element.find_element(By.CLASS_NAME, 'asking-price-mobile').text
 
             try:
                 url = element.find_element(By.CLASS_NAME, 'showcase').get_attribute('href')
