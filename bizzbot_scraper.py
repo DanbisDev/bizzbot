@@ -37,6 +37,8 @@ def get_listings_from_url(url):
     chrome_options.add_argument("--disable-gpu")  # Disable GPU for headless mode
     chrome_options.add_argument("--remote-debugging-port=9222")  # Enable remote debugging
     chrome_options.add_argument("--window-size=1920x1080")  # Set window size for headless mode
+    chrome_options.add_argument(
+        "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36")
 
     # Initialize ChromeDriver (should be in the PATH if installed with Nixpacks)
     driver = webdriver.Chrome(options=chrome_options)
