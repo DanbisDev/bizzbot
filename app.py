@@ -8,6 +8,15 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
+@app.route('/502', methods=['GET'])
+def error_page():
+    return render_template('502.html')
+
+# Handle 502 error
+@app.errorhandler(502)
+def bad_gateway_error(e):
+    return render_template('502.html'), 502
+
 # Route to serve the file for download
 @app.route('/download/<filename>')
 def download(filename):
