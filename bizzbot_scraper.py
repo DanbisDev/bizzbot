@@ -60,7 +60,15 @@ def get_listings_from_url(url):
             title = element.find_element(By.CLASS_NAME, 'title').text
             description = element.find_element(By.CLASS_NAME, 'description').text
             price = element.find_element(By.CLASS_NAME, 'asking-price').text
-            url = element.find_element(By.CLASS_NAME, 'showcase').get_attribute('href')
+
+            try:
+                url = element.find_element(By.CLASS_NAME, 'showcase').get_attribute('href')
+            except:
+                try:
+                    url = element.find_element(By.CLASS_NAME, 'diamond').get_attribute('href')
+                except:
+                    url = element.find_element(By.CLASS_NAME, 'basic').get_attribute('href')
+
             try:
                 cash_flow = element.find_element(By.CLASS_NAME, 'cash-flow').text.replace('Cash Flow: ', '')
             except:
