@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, send_from_directory, jsonify
-
+import os
 from bizzbot_scraper import get_csv_and_save
 
 app = Flask(__name__)
@@ -41,6 +41,6 @@ def generate_link():
 if __name__ == '__main__':
     from waitress import serve
 
-    port = 8080
+    port = os.env.PORT or 8080;
     serve(app, host="0.0.0.0", port=port)
     print("Now serving")
