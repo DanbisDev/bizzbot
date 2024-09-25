@@ -48,8 +48,11 @@ def get_listings_from_url(url):
         # Get the page source (the fully rendered HTML)
         html = driver.page_source
 
-        elements = driver.find_elements(By.TAG_NAME, 'app-listing-showcase')
+        elements_showcase = driver.find_elements(By.TAG_NAME, 'app-listing-showcase')
+        elements_basic = driver.find_elements(By.TAG_NAME, 'app-listing-basic')
+        elements_diamond = driver.find_elements(By.TAG_NAME, 'app-listing-diamond')
 
+        elements = elements_diamond + elements_basic + elements_showcase
 
         listings = []
 
