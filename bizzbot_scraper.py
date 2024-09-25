@@ -61,9 +61,12 @@ def get_listings_from_url(url):
         for element in elements:
             title = element.find_element(By.CLASS_NAME, 'title').text
             description = element.find_element(By.CLASS_NAME, 'description').text
-            price = element.find_element(By.CLASS_NAME, 'asking-price').text
+            # Use XPath to find the element with class "asking-price" that doesn't include "show-on-mobile"
+            price = element.find_element(By.XPATH,
+                                                 './/p[contains(@class, "asking-price") and not(contains(@class, "show-on-mobile"))]').text
 
-            print("price found: " + (element.find_element(By.CLASS_NAME, 'asking-price')).get_attribute('outerHTML'))
+
+            print("price found: " + price)
 
             try:
                 url = element.find_element(By.CLASS_NAME, 'showcase').get_attribute('href')
