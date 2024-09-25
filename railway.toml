@@ -1,0 +1,9 @@
+[build]
+# Define Nix packages to install
+packages = [
+  "google-chrome",   # Install Google Chrome
+  "chromedriver"     # Install ChromeDriver
+]
+
+# Define a custom start command (if necessary)
+start_command = "python app.py"
