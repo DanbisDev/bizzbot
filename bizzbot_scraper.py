@@ -63,6 +63,8 @@ def get_listings_from_url(url):
             description = element.find_element(By.CLASS_NAME, 'description').text
             price = element.find_element(By.CLASS_NAME, 'asking-price').text
 
+            print("price found: " + (element.find_element(By.CLASS_NAME, 'asking-price')).__str__())
+
             try:
                 url = element.find_element(By.CLASS_NAME, 'showcase').get_attribute('href')
             except:
