@@ -65,9 +65,6 @@ def get_listings_from_url(url):
             price = element.find_element(By.XPATH,
                                                  './/p[contains(@class, "asking-price") and not(contains(@class, "show-on-mobile"))]').text
 
-
-            print("price found: " + price)
-
             try:
                 url = element.find_element(By.CLASS_NAME, 'showcase').get_attribute('href')
             except:
