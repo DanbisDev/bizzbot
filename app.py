@@ -1,11 +1,6 @@
 from flask import Flask, render_template, request, send_from_directory, jsonify
 from bizzbot_scraper import get_csv_and_save
 import os
-
-# Check Chrome and ChromeDriver versions
-os.system("chromium --version")
-os.system("chromedriver --version")
-
 app = Flask(__name__)
 
 # Define the route for the main page
