@@ -3,7 +3,7 @@ builder = "NIXPACKS"
 
 # Include Python, Google Chrome, ChromeDriver, and other necessary packages
 [build.nixpacksPlan.phases.setup]
-nixPkgs = ["python311", "gcc", "unzip", "xvfb", "libxi6", "libgconf-2-4", "default-jdk"]
+nixPkgs = ["python311", "gcc", "google-chrome", "chromedriver", "unzip", "xvfb", "libxi6", "libgconf-2-4", "openjdk"]
 
 [build.nixpacksPlan.phases.install]
 cmds = [
