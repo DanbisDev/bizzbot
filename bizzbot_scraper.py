@@ -32,7 +32,9 @@ def get_listings_from_url(url):
     }
 
     options = webdriver.ChromeOptions()
-    driver = webdriver.Remote("intuitive-kindness-production.up.railway.app:4444/wd/hub", options=options)
+    driver = webdriver.Remote("intuitive-kindness.railway.internal:4444/wd/hub", options=options)
+
+    print("Got driver...")
 
     try:
         # Open the target URL
