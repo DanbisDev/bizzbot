@@ -61,7 +61,7 @@ def get_listings_from_url(url):
         for element in elements:
             title = element.find_element(By.CLASS_NAME, 'title').text
             description = element.find_element(By.CLASS_NAME, 'description').text
-            price = element.find_element(By.CLASS_NAME, 'asking-price').text
+            price = element.find_element(By.CLASS_NAME, 'asking-price ng-star-inserted').text
 
             try:
                 url = element.find_element(By.CLASS_NAME, 'showcase').get_attribute('href')
