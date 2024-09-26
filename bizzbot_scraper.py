@@ -28,13 +28,13 @@ class Listing:
 
 def get_driver():
     options = webdriver.ChromeOptions()
-    interval = 1
+    interval = 3
 
 
     while True:
         try:
             # Send a GET request to the URL
-            response = requests.get('intuitive-kindness.railway.internal:4444/wd/hub')
+            response = requests.get('intuitive-kindness-production.up.railway.app')
             # Check if the response status code is 200 (OK)
             if response.status_code == 200:
                 print("Received OK response, proceeding to initialize driver.")
