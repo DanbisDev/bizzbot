@@ -1,5 +1,7 @@
 import csv
 import os
+import time
+
 from selenium import webdriver
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.common.by import By
@@ -33,7 +35,12 @@ def get_listings_from_url(url):
 
     options = webdriver.ChromeOptions()
 
-    driver = webdriver.Remote("intuitive-kindness.railway.internal:4444/wd/hub", options=options)
+    try:
+        driver = webdriver.Remote("intuitive-kindness.railway.internal:4444/wd/hub", options=options)
+    except:
+        time.sleep(10)
+        driver = webdriver.Remote("intuitive-kindness.railway.internal:4444/wd/hub", options=options)
+
     driver.set_window_size(1920, 1080)
 
     print("Got driver...")
