@@ -34,11 +34,11 @@ def get_driver():
     while True:
         try:
             # Send a GET request to the URL
-            response = requests.get('http://intuitive-kindness.railway.internal:4444/wd/hub')
+            response = requests.get('intuitive-kindness.railway.internal:4444/wd/hub')
             # Check if the response status code is 200 (OK)
             if response.status_code == 200:
                 print("Received OK response, proceeding to initialize driver.")
-                driver = webdriver.Remote('http://intuitive-kindness.railway.internal:4444/wd/hub', options=options)
+                driver = webdriver.Remote('intuitive-kindness.railway.internal:4444/wd/hub', options=options)
                 break
             else:
                 print(f"Received response with status code {response.status_code}. Retrying...")
