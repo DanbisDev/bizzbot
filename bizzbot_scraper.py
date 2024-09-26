@@ -34,7 +34,7 @@ def get_driver():
     while True:
         try:
             # Send a GET request to the URL
-            response = requests.get('intuitive-kindness-production.up.railway.app')
+            response = requests.get('https://intuitive-kindness-production.up.railway.app')
             # Check if the response status code is 200 (OK)
             if response.status_code == 200:
                 print("Received OK response, proceeding to initialize driver.")
