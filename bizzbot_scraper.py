@@ -28,6 +28,10 @@ class Listing:
 
 def get_driver():
     options = webdriver.ChromeOptions()
+    options.headless = True
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
     interval = 3
 
 
