@@ -2,6 +2,7 @@ import csv
 import os
 import time
 
+import requests
 from selenium import webdriver
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.common.by import By
@@ -25,6 +26,32 @@ class Listing:
         return f"Listing:\nTitle - {self.title}\nDescription - {self.description}\nCash flow - {self.cash_flow}\nPrice - {self.price}\nURL - {self.url}\n"
 
 
+def get_driver():
+    options = webdriver.ChromeOptions()
+    interval = 1
+
+
+    while True:
+        try:
+            # Send a GET request to the URL
+            response = requests.get('http://intuitive-kindness.railway.internal:4444/wd/hub')
+            # Check if the response status code is 200 (OK)
+            if response.status_code == 200:
+                print("Received OK response, proceeding to initialize driver.")
+                driver = webdriver.Remote('http://intuitive-kindness.railway.internal:4444/wd/hub', options=options)
+                break
+            else:
+                print(f"Received response with status code {response.status_code}. Retrying...")
+        except requests.RequestException as e:
+            print(f"Error occurred: {e}. Retrying...")
+
+        # Wait for the specified interval before retrying
+        time.sleep(interval)
+
+    driver.set_window_size(1920, 1080)
+
+    return driver
+
 # Fetch HTML content using Selenium
 def get_listings_from_url(url):
     print("Trying to get from: " + url)
@@ -33,15 +60,7 @@ def get_listings_from_url(url):
         "profile.managed_default_content_settings.javascript": 2  # 2 means disable JavaScript
     }
 
-    options = webdriver.ChromeOptions()
-
-    try:
-        driver = webdriver.Remote("intuitive-kindness.railway.internal:4444/wd/hub", options=options)
-    except:
-        time.sleep(10)
-        driver = webdriver.Remote("intuitive-kindness.railway.internal:4444/wd/hub", options=options)
-
-    driver.set_window_size(1920, 1080)
+    driver = get_driver()
 
     print("Got driver...")
 
