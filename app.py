@@ -1,6 +1,7 @@
 import requests
 from flask import Flask, render_template, request, send_from_directory, jsonify
-from bizzbot_scraper import get_csv_and_save
+from bizzbot_scraper import get_csv_and_save, ScrapeError
+from urllib.parse import urlsplit
 import os
 app = Flask(__name__)
 
@@ -42,8 +43,26 @@ def receive_html():
 # Route to handle the form submission and return the download link
 @app.route('/generate_link', methods=['POST'])
 def generate_link():
-    data = request.json
-    get_csv_and_save(data['input'])
+    data = request.get_json(silent=True)
+    url = data.get('input') if isinstance(data, dict) else None
+    if not isinstance(url, str):
+        return jsonify({'error': 'Enter a BizBuySell search URL.'}), 400
+    url = url.strip()
+    try:
+        parsed = urlsplit(url)
+        valid = (parsed.scheme in ('http', 'https')
+                 and parsed.hostname in ('bizbuysell.com', 'www.bizbuysell.com')
+                 and not parsed.username and not parsed.password
+                 and parsed.port in (None, 80, 443))
+    except ValueError:
+        valid = False
+    if not valid:
+        return jsonify({'error': 'Enter a valid BizBuySell search URL.'}), 400
+    try:
+        get_csv_and_save(url)
+    except ScrapeError as exc:
+        app.logger.warning('CSV generation failed: %s', exc)
+        return jsonify({'error': str(exc)}), 502
     filename = 'bizzbot_scrape.csv'  # You can change this to any file you want to serve
     download_link = f"/download/{filename}"
     return jsonify({"link": download_link})

@@ -19,7 +19,7 @@ function handleGoButtonClick(e) {
         let i = 0;
         function type() {
             if (i < text.length) {
-                linkContainer.innerHTML += text.charAt(i);
+                linkContainer.textContent += text.charAt(i);
 
                 // Recalculate height on each new character typed
                 const newHeight = linkContainer.scrollHeight;
@@ -45,11 +45,12 @@ function handleGoButtonClick(e) {
             },
             body: JSON.stringify({ input: userInput }),
         })
-        .then(response => {
+        .then(async response => {
+            const data = await response.json();
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error(data.error || 'Could not generate the file. Please try again.');
             }
-            return response.json();
+            return data;
         })
         .then(data => {
             // Replace the loading message with the download message
