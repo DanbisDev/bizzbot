@@ -8,9 +8,16 @@ URL. The export contains the listings on that page (no automatic pagination).
 Run Selenium Standalone Chrome as a separate service reachable by the app.
 `SELENIUM_REMOTE_URL` defaults to
 `http://intuitive-kindness.railway.internal:4444/wd/hub`. Set it to the full
-HTTP URL of your Grid if the service name changes. The app connects directly
-to Grid; a successful HTTP response from its public homepage does not verify
-that BizBuySell loaded in the browser.
+HTTP URL of your Grid if the service name changes. Before creating a session,
+the app polls Grid's status endpoint for `value.ready: true`, for up to
+`SELENIUM_STARTUP_TIMEOUT` seconds (default 30, plus any in-flight request).
+Status requests have a 3-second socket timeout.
+
+If the original Railway Grid is unavailable, the app first attempts one public
+wake request. Set `SELENIUM_WAKE_URL` to your Selenium service's public URL
+if it changes, or to an empty string to disable waking. Custom Grid URLs do
+not wake the original service by default. A public HTTP 200 does not establish
+Grid readiness or verify that BizBuySell loaded.
 
 `PAGE_LOAD_TIMEOUT` and `LISTINGS_WAIT_TIMEOUT` default to 30 seconds each.
 The latter waits for populated listing cards, rather than their outer wrapper.
@@ -26,7 +33,9 @@ The reported deployment traceback shows a successful Chrome session followed
 by a 10-second element timeout. The original `.listing-container` selector was
 still present when checked on the supplied Utah URL. Without the failed
 deployment's HTML, a slow response and a blocked/challenge page cannot be
-distinguished. If diagnostics show access denial or human verification, a
+distinguished. Subsequent deployment logs confirmed an `Access Denied` page
+for `/utah-businesses-for-sale/?q=bHQ9MzAsNDAsODA%3D`, separately from an
+initial refused Selenium connection. If diagnostics show access denial or human verification, a
 longer wait will not fix it: check permitted access with BizBuySell from the
 deployment. This app does not bypass access controls.
 

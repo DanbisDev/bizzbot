@@ -3,7 +3,9 @@ import os
 from pathlib import Path
 import tempfile
 import unittest
-from unittest.mock import Mock, PropertyMock, patch
+from unittest.mock import Mock, MagicMock, PropertyMock, patch
+import requests
+from urllib3.exceptions import MaxRetryError, NewConnectionError
 
 from selenium.common.exceptions import TimeoutException, WebDriverException
 import bizzbot_scraper as scraper
@@ -79,13 +81,56 @@ class ScraperTests(unittest.TestCase):
             driver.save_screenshot.assert_called_once()
 
     @patch.object(scraper.webdriver, 'Remote')
-    def test_driver_configuration(self, remote):
+    @patch.object(scraper, 'wait_for_selenium')
+    def test_driver_configuration(self, ready, remote):
         with patch.dict(os.environ, {'SELENIUM_REMOTE_URL': 'http://selenium:4444/wd/hub'}):
             scraper.get_driver()
         self.assertEqual(remote.call_args.args[0], 'http://selenium:4444/wd/hub')
         options = remote.call_args.kwargs['options']
         self.assertIn('--headless=new', options.arguments)
         self.assertEqual(options.page_load_strategy, 'eager')
+
+    @patch.object(scraper, 'wait_for_selenium')
+    @patch.object(scraper.webdriver, 'Remote')
+    def test_connection_refused_returns_json(self, remote, ready):
+        remote.side_effect = MaxRetryError(None, '/wd/hub/session',
+                                          NewConnectionError(None, 'Connection refused'))
+        response = app.test_client().post('/generate_link', json={'input': 'https://www.bizbuysell.com/utah-businesses-for-sale/?q=bHQ9MzAsNDAsODA%3D'})
+        self.assertEqual(response.status_code, 502)
+        self.assertIn('Could not connect to Selenium', response.json['error'])
+
+    @patch.object(scraper.time, 'sleep')
+    @patch.object(scraper.requests, 'get')
+    def test_cold_start_wakes_then_waits_for_grid(self, get, sleep):
+        wake = MagicMock()
+        pending = MagicMock()
+        pending.__enter__.return_value.json.return_value = {'value': {'ready': False}}
+        ready = MagicMock()
+        ready.__enter__.return_value.json.return_value = {'value': {'ready': True}}
+        get.side_effect = [requests.ConnectionError('refused'), wake, pending, ready]
+        with patch.dict(os.environ, {}, clear=True):
+            scraper.wait_for_selenium(scraper.DEFAULT_REMOTE_URL)
+        self.assertEqual(get.call_count, 4)
+        self.assertEqual(get.call_args_list[0].args[0], scraper.DEFAULT_REMOTE_URL + '/status')
+        self.assertEqual(get.call_args_list[1].args[0], 'https://intuitive-kindness-production.up.railway.app')
+
+    @patch.object(scraper.time, 'monotonic', side_effect=[0, 0, 1, 2])
+    @patch.object(scraper.requests, 'get', side_effect=requests.ConnectionError('refused'))
+    def test_unavailable_grid_has_bounded_wait(self, get, clock):
+        with patch.dict(os.environ, {'SELENIUM_STARTUP_TIMEOUT': '1', 'SELENIUM_WAKE_URL': ''}):
+            with self.assertRaisesRegex(scraper.ScrapeError, 'Selenium is not ready'):
+                scraper.wait_for_selenium('http://selenium:4444')
+        get.assert_called_once()
+
+    @patch.object(scraper, 'get_driver')
+    @patch.object(scraper, 'save_diagnostics')
+    def test_disconnect_during_navigation_and_quit_keeps_useful_error(self, diagnostics, get_driver):
+        driver = get_driver.return_value
+        driver.get.side_effect = MaxRetryError(None, '/url')
+        driver.quit.side_effect = MaxRetryError(None, '/session')
+        with self.assertRaisesRegex(scraper.ScrapeError, 'browser could not load'):
+            scraper.get_listings_from_url('https://www.bizbuysell.com/')
+        driver.quit.assert_called_once()
 
     @patch.object(scraper, 'get_listings_from_url')
     def test_csv_written_and_preserved_on_failure(self, scrape):

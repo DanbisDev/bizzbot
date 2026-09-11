@@ -1,16 +1,21 @@
 import csv
 import logging
 import os
+import time
 from pathlib import Path
 from uuid import uuid4
 
 from bs4 import BeautifulSoup
+import requests
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException, WebDriverException
 from selenium.webdriver.support.wait import WebDriverWait
+from urllib3.exceptions import HTTPError
 
 logger = logging.getLogger(__name__)
 CARD_SELECTOR = 'app-listing-diamond, app-listing-basic, app-listing-showcase'
+DEFAULT_REMOTE_URL = 'http://intuitive-kindness.railway.internal:4444/wd/hub'
+CONNECTION_ERRORS = (WebDriverException, HTTPError, OSError)
 
 
 class ScrapeError(Exception):
@@ -29,6 +34,44 @@ class Listing:
         return f'Listing: {self.title} ({self.url})'
 
 
+def wait_for_selenium(remote_url):
+    """Wait for Grid readiness, waking the original Railway service if needed."""
+    timeout = float(os.environ.get('SELENIUM_STARTUP_TIMEOUT', '30'))
+    deadline = time.monotonic() + timeout
+    status_url = remote_url.rstrip('/') + '/status'
+    wake_url = os.environ.get('SELENIUM_WAKE_URL',
+        'https://intuitive-kindness-production.up.railway.app'
+        if remote_url == DEFAULT_REMOTE_URL else '')
+    wake_attempted = False
+    last_error = None
+    while time.monotonic() < deadline:
+        try:
+            with requests.get(status_url, timeout=3) as response:
+                response.raise_for_status()
+                payload = response.json()
+            if isinstance(payload, dict) and isinstance(payload.get('value'), dict):
+                if payload['value'].get('ready') is True:
+                    return
+        except (requests.RequestException, ValueError) as exc:
+            last_error = exc
+        if wake_url and not wake_attempted:
+            wake_attempted = True
+            try:
+                # The public request can wake the service, but only Grid's
+                # private status response can establish readiness.
+                with requests.get(wake_url, timeout=3):
+                    pass
+            except requests.RequestException:
+                logger.warning('Selenium wake request did not complete')
+        remaining = deadline - time.monotonic()
+        if remaining > 0:
+            time.sleep(min(1, remaining))
+    raise ScrapeError(
+        'Selenium is not ready. Check that the Selenium service is running '
+        'and SELENIUM_REMOTE_URL points to its listening port.'
+    ) from last_error
+
+
 def get_driver():
     options = webdriver.ChromeOptions()
     options.add_argument('--headless=new')
@@ -40,17 +83,21 @@ def get_driver():
     options.page_load_strategy = 'eager'
     remote_url = os.environ.get(
         'SELENIUM_REMOTE_URL',
-        'http://intuitive-kindness.railway.internal:4444/wd/hub',
+        DEFAULT_REMOTE_URL,
     )
+    wait_for_selenium(remote_url)
     try:
         driver = webdriver.Remote(remote_url, options=options)
-    except WebDriverException as exc:
+    except CONNECTION_ERRORS as exc:
         raise ScrapeError('Could not connect to Selenium. Check that the Selenium service is running.') from exc
     try:
         driver.set_page_load_timeout(float(os.environ.get('PAGE_LOAD_TIMEOUT', '30')))
-    except Exception:
-        driver.quit()
-        raise
+    except CONNECTION_ERRORS as exc:
+        try:
+            driver.quit()
+        except CONNECTION_ERRORS:
+            logger.warning('Could not close the Selenium session', exc_info=True)
+        raise ScrapeError('Selenium disconnected while configuring the browser. Please try again.') from exc
     return driver
 
 
@@ -133,13 +180,13 @@ def get_listings_from_url(url):
     except ScrapeError:
         save_diagnostics(driver)
         raise
-    except WebDriverException as exc:
+    except CONNECTION_ERRORS as exc:
         save_diagnostics(driver)
         raise ScrapeError('The browser could not load BizBuySell. Please try again.') from exc
     finally:
         try:
             driver.quit()
-        except WebDriverException:
+        except CONNECTION_ERRORS:
             logger.warning('Could not close the Selenium session', exc_info=True)
 
 
