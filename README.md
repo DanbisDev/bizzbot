@@ -1,5 +1,16 @@
 # Bizzbot
 
+## Chrome extension (no server required)
+
+The `extension/` folder contains a Manifest V3 Chrome extension. Open
+`chrome://extensions`, enable Developer mode, choose Load unpacked and select
+`extension/`. Open a BizBuySell results page normally, click Bizzbot, then
+Download CSV. See [installation and usage](extension/README.md).
+
+Exports the current page only, directly from the loaded browser DOM. No Railway,
+Selenium, paid browser service or API key is required. The existing server app
+is retained below for reference. Run `node extension/test-csv.mjs` for CSV checks.
+
 Install `requirements.txt`, run `python app.py`, and submit a BizBuySell search
 URL. The export contains the listings on that page (no automatic pagination).
 

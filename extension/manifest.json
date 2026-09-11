@@ -1,0 +1,8 @@
+{
+  "manifest_version": 3,
+  "name": "Bizzbot CSV Export",
+  "version": "1.0.0",
+  "description": "Export the BizBuySell listings loaded in your current tab to CSV.",
+  "permissions": ["activeTab", "scripting", "downloads"],
+  "action": {"default_popup": "popup.html", "default_title": "Export BizBuySell listings"}
+}
